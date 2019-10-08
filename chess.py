@@ -122,19 +122,5 @@ print("CHECK MATE!! {} wins!".format(chess.opponent(current_player).color))
 
 sys.exit()
 
-# is game over?
-# k = b.find('white', 'king')[0]
-# print(k)
-# if b.in_check('white') and b.check_breaking_moves() == 0:
-#   print "Game Over!"
-# else:
-#   try:
-#     white.move('d2', 'd4')
-#     if b.in_check('white'):
-#       raise ValueError("Cannot put yourself in check!")
-
-# b.dump()
-
-
 
 
