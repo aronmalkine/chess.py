@@ -33,7 +33,7 @@ class Player(object):
         taken_piece = to_square.take()
         self.pieces_taken.append(taken_piece)
       to_square.set(from_square.piece)
-      self.board.h.push(history.Event(self, from_square_code, to_square_code, taken_piece))
+      self.board.h.push(history.Event(self, to_square.piece.code, from_square_code, to_square_code, taken_piece))
     else:
       print(from_square.piece.moves())
       raise ValueError("You can't move that piece there!")

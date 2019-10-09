@@ -8,7 +8,6 @@ import pieces
 
 class Chess(object):
   b = None;
-  h = None;
   white = None;
   black = None;
   current_player = None;
@@ -70,10 +69,10 @@ class Chess(object):
 
 chess = Chess()
 
-while (not chess.current_player.in_check() or len(chess.current_player.check_breaking_moves()) != 0):
-  
-  # Show board
-  chess.b.dump()
+# Show board
+chess.b.dump()
+
+while (not chess.current_player.in_check() or len(chess.current_player.check_breaking_moves()) != 0):  
 
   # Prompt for command  
   command = input("\n{} to move: ".format(chess.current_player.color))
@@ -88,23 +87,31 @@ while (not chess.current_player.in_check() or len(chess.current_player.check_bre
       last_move = chess.b.h.pop()
       last_move.player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
       chess.switch_players()
+      chess.b.dump()
+    elif command == 'history':
+      chess.b.h.dump()
     else:
+      c = command.split(" ")
       # Handle move
-      c = command.split(" ")  
-      if len(c) != 2:
-        print("move should be provided in two parts. start square and end square ex: 'd2 d4'")
-      else:
+      if c[0] == "moves" and len(c[1]) == 2:
+
+        print(chess.b.to_code(chess.b.at(c[1]).piece.moves()))
+
+      elif len(c) == 2:
 
         chess.current_player.move(c[0], c[1])
 
         if chess.current_player.in_check():
 
           raise ValueError("Cannot put yourself in check!")
-          chess.current_player.unmove(chess.h.pop())
+          last_move = chess.b.h.pop()
+          chess.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
 
         else:
 
           chess.switch_players()
+          chess.b.dump()
+
 
   except Exception as error:
     print('\n##### ERROR #####\n')

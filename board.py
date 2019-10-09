@@ -6,9 +6,6 @@ import history
 
 class Square(object):
 
-  x_values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-  y_values = ['1', '2', '3', '4', '5', '6', '7', '8']
-
   _board = None
   _x = 0
   _y = 0
@@ -19,8 +16,8 @@ class Square(object):
       self._board = board
       self._x = x
       self._y = y
-      self._horiz = self.x_values[x]
-      self._vert = self.y_values[y]
+      self._horiz = self._board.x_values[x]
+      self._vert = self._board.y_values[y]
 
   def __repr__(self):
     rep = self.code()
@@ -56,6 +53,9 @@ class Square(object):
 
 class Board(object):
 
+  x_values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+  y_values = ['1', '2', '3', '4', '5', '6', '7', '8']
+
   SIZE = 8
   squares = [] 
   h = None
@@ -73,8 +73,8 @@ class Board(object):
   def at(self, loc):
     if not isinstance(loc, str):
       raise TypeError('Expected string argument.')
-    x = Square.x_values.index(loc[0])
-    y = Square.y_values.index(loc[1])
+    x = self.x_values.index(loc[0])
+    y = self.y_values.index(loc[1])
     return self.squares[x][y]
 
   def exists(self, x, y):
@@ -95,11 +95,15 @@ class Board(object):
   def find(self, color, name):
     return filter(lambda x: x.name == pieces. King.name, self.pieces(color))
 
+  def to_code(self, coords):
+    return list(map(lambda coord: self.x_values[coord[0]] + self.y_values[coord[1]], coords))
+
   def dump(self):
-    print(''.join(([" - "] * self.SIZE)))
+    print()
+    print('   ',''.join((["---"] * self.SIZE)))
     for y in range(self.SIZE-1,-1,-1):
       # print("y", y)
-      row = ""
+      row = "{} | ".format(y+1  )
       for x in range(self.SIZE):
         # print("x", x)
         item = self.squares[x][y]
@@ -110,8 +114,10 @@ class Board(object):
             row = row + " {} ".format(item.piece.code)
           else:
             row = row + "+{} ".format(item.piece.code)
-      print(row)
-    print(''.join(([" - "] * self.SIZE)))
-
-
+      print(row, "|")
+    print('   ',''.join((["---"] * self.SIZE)))
+    y_labels = '    '
+    for a in range(8):
+      y_labels += " {} ".format(chr(97+a))
+    print(y_labels)
 
