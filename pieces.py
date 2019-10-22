@@ -15,19 +15,25 @@ class Piece(object):
   def moves(self):
     pass
 
-  def valid_moves(self, possible_moves, moves_only=False, attacks_only=False):
+  def attacks(self):
+    return self.valid(self.moves(), attacks_only=True)
+
+  def valid(self, possible_moves, moves_only=False, attacks_only=False):
+    # check that move is 
+    # 1) on the board
+    # 2) if an attack, it's not on your own piece
+
     b = self.square._board
     valid = []
     for m in possible_moves:
-      x1 = m[0]
-      y1 = m[1]
+      x1, y1 = m
       if b.exists(x1, y1):
         target_square = b[x1][y1]
         if not attacks_only:
           if target_square.is_empty() or target_square.piece.color != self.color:
             valid.append(m)
         else:
-          if target_square.piece.color != self.color:
+          if target_square.is_occupied() and target_square.piece.color != self.color:
             valid.append(m)
     return valid
 
@@ -71,12 +77,12 @@ class King(Piece):
     if self.square is None:
       raise ValueError('Piece has not been set on the board.')
     
-    print('moves from', self.square._x, self.square._y, self.square.code())
+    # print('moves from', self.square._x, self.square._y, self.square.code())
     moves = []
     x = self.square._x
     y = self.square._y
     possible_moves = [ [x, y+1], [x+1, y+1], [x+1, y], [x+1, y-1], [x, y-1], [x-1, y-1], [x-1, y], [x-1, y+1] ]
-    moves = self.valid_moves(possible_moves)
+    moves = self.valid(possible_moves)
     return moves
 
 class Knight(Piece):
@@ -87,7 +93,7 @@ class Knight(Piece):
     x = self.square._x
     y = self.square._y
     possible_moves = [ [x+1, y+2], [x+1, y-2], [x-1, y+2], [x-1, y-2], [x+2, y+1], [x+2, y-1],  [x-2, y+1], [x-2, y-1] ]
-    moves = self.valid_moves(possible_moves)
+    moves = self.valid(possible_moves)
     return moves
 
 class Pawn(Piece):
@@ -95,7 +101,6 @@ class Pawn(Piece):
   code = "p"
   def moves(self):
     moves = []
-    b = self.square._board
     x = self.square._x
     y = self.square._y
     if self.color == 'white':
@@ -104,35 +109,27 @@ class Pawn(Piece):
       # two forward on first move
       if y == 1:
         possible_moves.append( [x, y+2] )
-      moves = self.valid_moves(possible_moves, moves_only=True)
-      # normal attacks
-      # If diagonal forward squares are occupied by opponent, add to moves
-      possible_attacks = []
-      diagonal = b[x+1][y+1]
-      if diagonal.is_occupied() and diagonal.piece.color != 'white':
-        possible_attacks.append( [x+1, y+1] )
-      diagonal = b[x-1][y+1]
-      if  diagonal.is_occupied() and diagonal.piece.color != 'white':
-        possible_attacks.append( [x+1, y+1] )
-      moves = moves + self.valid_moves(possible_moves=possible_attacks, attacks_only=True)
+      moves = self.valid(possible_moves=possible_moves, moves_only=True)
     else:
       # normal move
       possible_moves = [ [x, y-1] ]
       # two forward on first move
       if y == 6:
         possible_moves.append( [x, y-2] )
-      moves = self.valid_moves(possible_moves, moves_only=True)
-      # normal attacks
-      # If diagonal forward squares are occupied by opponent, add to moves
-      possible_attacks = []
-      diagonal = b[x+1][y-1]
-      if not diagonal.is_empty() and diagonal.piece.color != 'white':
-        possible_attacks.append( [x+1, y-1] )
-      diagonal = b[x-1][y-1]
-      if not diagonal.is_empty() and diagonal.piece.color != 'white':
-        possible_attacks.append( [x+1, y-1] )
-      moves = moves + self.valid_moves(possible_moves=possible_attacks, attacks_only=True)
-    return moves
+      moves = self.valid(possible_moves=possible_moves, moves_only=True)     
+    return moves + self.attacks()
+
+  def attacks(self):
+    attacks = []
+    x = self.square._x
+    y = self.square._y
+    if self.color == 'white':
+      possible_attacks = [ [x+1, y+1], [x-1, y+1] ]
+      attacks = attacks + self.valid(possible_moves=possible_attacks, attacks_only=True)
+    else:
+      possible_attacks = [ [x+1, y-1], [x-1, y-1] ]
+      attacks = attacks + self.valid(possible_moves=possible_attacks, attacks_only=True)
+    return attacks
 
 class Rook(Piece):
   name = "rook"

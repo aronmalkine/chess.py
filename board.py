@@ -93,12 +93,24 @@ class Board(object):
     return matches
 
   def find(self, color, name):
-    return filter(lambda x: x.name == pieces. King.name, self.pieces(color))
+    return filter(lambda x: x.name == pieces.name, self.pieces(color))
+
+  def attacks(self, color):
+    attacks = []
+
+    for p in self.pieces(color):
+      # print(p.square)
+      # print(p.attacks())
+      for a in p.attacks():
+        x, y = a
+        attack = self.squares[x][y]
+        attacks.append([p.square, attack])
+    return attacks
 
   def to_code(self, coords):
     return list(map(lambda coord: self.x_values[coord[0]] + self.y_values[coord[1]], coords))
 
-  def dump(self):
+  def render(self):
     print()
     print('   ',''.join((["---"] * self.SIZE)))
     for y in range(self.SIZE-1,-1,-1):

@@ -38,7 +38,7 @@ class History(object):
   def pop(self):
     return self.hist.pop()
 
-  def dump(self):
+  def output(self):
     round = []
     index = 1
     
