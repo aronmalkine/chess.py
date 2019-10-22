@@ -7,6 +7,7 @@ class Piece(object):
   code = None
   color = None
   square = None
+  value = None
   def __init__(self, color):
     if color not in [ "white", "black" ]:
       raise ValueError("Color must be white or black")
@@ -73,6 +74,7 @@ class Piece(object):
 class King(Piece):
   name = "king"
   code = "K"
+  value = 10000
   def moves(self):
     if self.square is None:
       raise ValueError('Piece has not been set on the board.')
@@ -88,6 +90,7 @@ class King(Piece):
 class Knight(Piece):
   name = "knight"
   code = "k"
+  value = 350
   def moves(self):
     moves = []
     x = self.square._x
@@ -99,6 +102,7 @@ class Knight(Piece):
 class Pawn(Piece):
   name = "pawn"
   code = "p"
+  value = 100
   def moves(self):
     moves = []
     x = self.square._x
@@ -134,6 +138,7 @@ class Pawn(Piece):
 class Rook(Piece):
   name = "rook"
   code = "r"
+  value = 500
   def moves(self):
     moves = []
     funcs = [ 
@@ -149,6 +154,7 @@ class Rook(Piece):
 class Bishop(Piece):
   name = "bishop"
   code = "b"
+  value = 350
   def moves(self):
     moves = []
     funcs = [ 
@@ -164,6 +170,7 @@ class Bishop(Piece):
 class Queen(Piece):
   name = "queen"
   code = "Q"
+  value = 1000
   def moves(self):
     moves = []
     funcs = [ 

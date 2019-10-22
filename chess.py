@@ -102,6 +102,11 @@ while True: #(not chess.in_check(chess.current_player) or len(chess.check_breaki
     elif command in [ 'history', 'h' ]:
       chess.b.h.output()
 
+    elif command in [ 'score', 's' ]:
+      white_material, black_material, white_pieces, black_pieces = chess.b.score()
+      print("white: {material:>6}".format(material=white_material), ", ".join(white_pieces))
+      print("black: {material:>6}".format(material=black_material), ", ".join(black_pieces))
+
     elif command in [ 'board', 'b']:
       chess.b.render()
 

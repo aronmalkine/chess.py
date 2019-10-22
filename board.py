@@ -110,6 +110,9 @@ class Board(object):
   def to_code(self, coords):
     return list(map(lambda coord: self.x_values[coord[0]] + self.y_values[coord[1]], coords))
 
+  def score(self):
+    return self.h.score()
+
   def render(self):
     print()
     print('   ',''.join((["---"] * self.SIZE)))

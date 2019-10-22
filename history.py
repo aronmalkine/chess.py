@@ -38,12 +38,27 @@ class History(object):
   def pop(self):
     return self.hist.pop()
 
+  def score(self):
+    white_pieces = []
+    black_pieces = []
+    white_material = 0
+    black_material = 0
+    for event in self.hist:
+      if event.piece_taken:
+        if event.player.color == 'white':
+          white_pieces.append(event.piece_taken.code)
+          white_material += event.piece_taken.value
+        else:
+          black_pieces.append(event.piece_taken.code)
+          black_material += event.piece_taken.value
+    return [white_material, black_material, white_pieces, black_pieces]
+
   def output(self):
     round = []
     index = 1
     
-    for h in self.hist:
-      round.append(h)
+    for event in self.hist:
+      round.append(event)
       if len(round) == 2:
         print("{:3}. {:8} {:8}".format(index, str(round[0]), str(round[1])))
         round = []
