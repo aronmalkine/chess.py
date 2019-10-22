@@ -32,6 +32,21 @@ class History(object):
 
   hist = []
 
+  def __repr__(self):
+    round = []
+    index = 1
+    output = ""
+    
+    for event in self.hist:
+      round.append(event)
+      if len(round) == 2:
+        output = output + "{:3}. {:8} {:8}".format(index, str(round[0]), str(round[1])) + "\n"
+        round = []
+        index += 1
+    if len(round) == 1:
+      output = output + "{:3}. {:8}".format(index, str(round[0])) + "\n"
+    return output
+
   def push(self, event):
     self.hist.append(event)
 
@@ -53,15 +68,3 @@ class History(object):
           black_material += event.piece_taken.value
     return [white_material, black_material, white_pieces, black_pieces]
 
-  def output(self):
-    round = []
-    index = 1
-    
-    for event in self.hist:
-      round.append(event)
-      if len(round) == 2:
-        print("{:3}. {:8} {:8}".format(index, str(round[0]), str(round[1])))
-        round = []
-        index += 1
-    if len(round) == 1:
-      print("{:3}. {:8}".format(index, str(round[0])))

@@ -100,7 +100,7 @@ while True: #(not chess.in_check(chess.current_player) or len(chess.check_breaki
       chess.b.render()
 
     elif command in [ 'history', 'h' ]:
-      chess.b.h.output()
+      print(chess.b.h)
 
     elif command in [ 'score', 's' ]:
       white_material, black_material, white_pieces, black_pieces = chess.b.score()
