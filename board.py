@@ -93,7 +93,10 @@ class Board(object):
     return matches
 
   def find(self, color, name):
-    return filter(lambda x: x.name == pieces.name, self.pieces(color))
+    return list(filter(lambda x: x.name == name, self.pieces(color)))
+
+  def find_first(self, color, name):
+    return self.find(color, name)[0]
 
   def attacks(self, color):
     attacks = []

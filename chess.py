@@ -1,23 +1,51 @@
 import sys
 import traceback
+import copy
 
 import board
 import history
 import players
 import pieces
 
+
 class Chess(object):
+  """Represents a game of chess.
+
+  Instance variables:
+  b -- the chess board
+  white -- the white player object
+  black -- the black player object
+  current_player -- reference to next player to move
+
+  Public methods:
+  play -- start game and enter event loop
+    Supported commands:
+      exit/quit/q -- exit game
+      undo/u -- undo last move
+      history/h -- show history of game up until present
+      score/s -- show scores
+      board/b -- render the board
+      moves -- list moves for black, white, or for an occupied square, ex: 'moves white' or 'moves c1'
+      attacks -- list attacks for black, white, or for an occupied square, ex: 'attacks white' or 'attacks c1')
+      move/m -- move from sqare to square, ex 'm d2 d4'
+      debug/d -- enter debug mode (ipdb session)      
+
+  opponent -- takes a player object and returns the other player object
+  switch_players -- after a move, this method is called to update the current player
+  in_check -- for a given player, determines if the player's king is under attack
+  """
+
   b = None;
   white = None;
   black = None;
   current_player = None;
 
-  def __init__(self):
+  def __init__(self, white_name, black_name):
 
     self.b = board.Board()
 
-    self.white = players.Player(name='Aron', color='white', board=self.b)
-    self.black = players.Player(name='Mous', color='black', board=self.b)
+    self.white = players.Player(name=white_name, color='white', board=self.b)
+    self.black = players.Player(name=black_name, color='black', board=self.b)
 
     self.b[0][0].set(pieces.Rook('white'))
     self.b[1][0].set(pieces.Knight('white'))
@@ -68,123 +96,151 @@ class Chess(object):
     self.current_player = self.opponent(self.current_player)
 
   def in_check(self, player):
+    king_square = self.b.find_first(player.color, 'king').square.code()
+    attacks = self.opponent(player).attacks()
+    for attack in attacks:
+      # attacks include attacker piece ref and attacked piece ref [attacker, attacked]
+      if king_square == attack[1].code():
+        return True
     return False
-    # return board.find(player.color, 'king').square.code() in board.to_code(self.player.opponent().attacks())
 
-chess = Chess()
+  def play(self):
 
-# Show board
-chess.b.render()
+    # Show board
+    self.b.render()
 
-while True: #(not chess.in_check(chess.current_player) or len(chess.check_breaking_moves(chess.current_player)) != 0):  
+    while True: #(not self.in_check(self.current_player) or len(self.check_breaking_moves(self.current_player)) != 0):  
 
-  # Prompt for command  
-  input_data = input("\n{} to move: ".format(chess.current_player.color))
+      # Prompt for command  
+      input_data = input("\n{} to move: ".format(self.current_player.color))
 
-  try:
+      try:
 
-    input_data = input_data.split(" ")
+        input_data = input_data.split(" ")
 
-    command = input_data[0]
+        command = input_data[0]
 
-    if command in [ 'exit', 'quit', 'q']:
-      # Handle exit
-      print("\nHope you enjoyed the game! Play again soon!\n\n")
-      sys.exit()
+        if command in [ 'exit', 'quit', 'q']:
+          # Handle exit
+          print("\nHope you enjoyed the game! Play again soon!\n\n")
+          sys.exit()
 
-    elif command in [ 'undo', 'u']:
-      # Handle undo
-      last_move = chess.b.h.pop()
-      last_move.player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
-      chess.switch_players()
-      chess.b.render()
+        elif command in [ 'undo', 'u']:
+          # Handle undo
+          last_move = self.b.h.pop()
+          last_move.player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
+          self.switch_players()
+          self.b.render()
 
-    elif command in [ 'history', 'h' ]:
-      print(chess.b.h)
+        elif command in [ 'history', 'h' ]:
+          print(self.b.h)
 
-    elif command in [ 'score', 's' ]:
-      white_material, black_material, white_pieces, black_pieces = chess.b.score()
-      print("white: {material:>6}".format(material=white_material), ", ".join(white_pieces))
-      print("black: {material:>6}".format(material=black_material), ", ".join(black_pieces))
+        elif command in [ 'score', 's' ]:
+          white_material, black_material, white_pieces, black_pieces = self.b.score()
+          print("white: {material:>6}".format(material=white_material), ", ".join(white_pieces))
+          print("black: {material:>6}".format(material=black_material), ", ".join(black_pieces))
 
-    elif command in [ 'board', 'b']:
-      chess.b.render()
+        elif command in [ 'board', 'b']:
+          self.b.render()
 
-    elif command == 'moves':
+        elif command == 'moves':
 
-      if len(input_data[1]) == 2:
+          target = input_data[1]
 
-        target = input_data[1]
+          if len(target) == 2:
 
-        print(", ".join(chess.b.to_code(chess.b.at(target).piece.moves())))
+            moves = self.b.at(target).piece.moves()
 
-      elif input_data[1] == 'all':
+            readable_moves = self.b.to_code(moves)
 
-        print("ToDo")
+            print(", ".join(readable_moves))
 
-    elif command == "attacks":
+          elif target in [ "white", "black" ]:
 
-      target = input_data[1]
+            print("ToDo")
 
-      if target in [ "white", "black" ]:
+        elif command == "attacks":
 
-        for a in chess.b.attacks(target):
-          print(a[0], "takes", a[1])
+          target = input_data[1]
 
-      elif len(target) == 2:
+          if target in [ "white", "black" ]:
 
-        attacks = chess.b.at(target).piece.attacks()
+            for a in self.b.attacks(target):
+              print(a[0], "takes", a[1])
 
-        readable_attacks = chess.b.to_code(attacks)
+          elif len(target) == 2:
 
-        print(", ".join(readable_attacks))
+            attacks = self.b.at(target).piece.attacks()
 
-      else:
-        raise ValueError("attacks command expects 'white', 'black', or an occupied square.")
+            readable_attacks = self.b.to_code(attacks)
 
-    elif command in [ "move", "m" ]:
+            print(", ".join(readable_attacks))
 
-      move_from = input_data[1]
-      move_to = input_data[2]
+          else:
+            raise ValueError("attacks command expects 'white', 'black', or an occupied square, ex 'c1'")
 
-      chess.current_player.move(move_from, move_to)
+        elif command in [ "move", "m" ]:
 
-      if chess.in_check(chess.current_player):
+          move_from = input_data[1]
+          move_to = input_data[2]
 
-        raise ValueError("Cannot put yourself in check!")
-        last_move = chess.b.h.pop()
-        chess.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
+          from_check = self.in_check(self.current_player)
 
-      else:
+          self.current_player.move(move_from, move_to)
 
-        chess.switch_players()
-        chess.b.render()
+          if self.in_check(self.current_player) and from_check:
 
-    elif command in [ "debug", "d" ]:
+            last_move = self.b.h.pop()
+            self.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
 
-      import pdb; pdb.set_trace()
+            print("Illegal move: King remains in check!")
 
-      print("\nResuming game\n\n")
+          elif self.in_check(self.current_player):
 
-    else:
-      print("Unrecognized command:", input_data)
+            last_move = self.b.h.pop()
+            self.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
+
+            print("Illegal move: Cannot put yourself in check!")
+
+          else:
+
+            self.switch_players()
+            self.b.render()
+
+            if self.in_check(self.current_player):
+              print("\n### CHECK! ###")
+
+        elif command in [ "debug", "d" ]:
+
+          import ipdb; ipdb.set_trace(context=5)
+
+          print("\nResuming game\n\n")
+
+        else:
+          print("Unrecognized command:", input_data)
 
 
-  except Exception as error:
-    print('\n##### ERROR #####\n')
-    type_, value_, traceback_ = sys.exc_info()
+      except Exception as error:
+        print('\n##### ERROR #####\n')
+        type_, value_, traceback_ = sys.exc_info()
 
-    trace = traceback.format_tb(traceback_)
+        trace = traceback.format_tb(traceback_)
 
-    print(*trace, sep = "\n")
-    print(type_, '\n')
-    print(value_)
-    print('\n#####\n')
+        print(*trace, sep = "\n")
+        print(type_, '\n')
+        print(value_)
+        print('\n#####\n')
 
 
-print("CHECK MATE!! {} wins!".format(chess.opponent(current_player).color))
+    print("CHECK MATE!! {} wins!".format(self.opponent(current_player).color))
 
-sys.exit()
+    sys.exit()
+
+# Create game
+game = Chess('Aron', 'Mous')
+
+game.play()
+
 
 
 

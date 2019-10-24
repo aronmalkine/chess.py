@@ -49,6 +49,9 @@ class Player(object):
       self.pieces_taken.remove(piece_taken)
       to_square.set(piece_taken)
 
+  def attacks(self):
+    return self.board.attacks(self.color)
+
   def check_breaking_moves(self):
     return []
 
