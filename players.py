@@ -16,16 +16,16 @@ class Player(object):
 
   def move(self, from_square_code, to_square_code):
     if not isinstance(from_square_code, str):
-      raise ValueError("Expected string for from_square_code.")
+      raise ValueError("Expected from_square_code as a string.")
     if not isinstance(to_square_code, str):
-      raise ValueError("Expected string for to_square_code.")
+      raise ValueError("Expected to_square_code as a string.")
     from_square = self.board.at(from_square_code)
     to_square = self.board.at(to_square_code)
 
     if from_square.piece is None:
       raise ValueError("No piece found on", from_square_code)
     if from_square.piece.color != self.color:
-      raise ValueError("Cannot move opponent's piece.")
+      raise ValueError("Illegal move: Cannot move opponent's piece.")
 
     if [to_square._x, to_square._y] in from_square.piece.moves():
       taken_piece = None
@@ -34,12 +34,11 @@ class Player(object):
           taken_piece = to_square.take()
           self.pieces_taken.append(taken_piece)
         else:
-          raise ValueError("Illegal attack.")
+          raise ValueError("Illegal attack!")
       to_square.set(from_square.piece)
       self.board.h.push(history.Event(self, to_square.piece.code, from_square_code, to_square_code, taken_piece))
     else:
-      print(from_square.piece.moves())
-      raise ValueError("You can't move that piece there!")
+      raise ValueError("Illegal move: You can't move that piece there!")
 
   def unmove(self, from_square_code, to_square_code, piece_taken):
     from_square = self.board.at(from_square_code)

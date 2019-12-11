@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import traceback
 import copy
@@ -177,7 +179,7 @@ class Chess(object):
             print(", ".join(readable_attacks))
 
           else:
-            raise ValueError("attacks command expects 'white', 'black', or an occupied square, ex 'c1'")
+            raise ValueError("Illegal command: The 'attacks' command expects 'white', 'black', or an occupied square, ex 'c1'")
 
         elif command in [ "move", "m" ]:
 
@@ -219,6 +221,9 @@ class Chess(object):
         else:
           print("Unrecognized command:", input_data)
 
+
+      except ValueError as error:
+        print(error)
 
       except Exception as error:
         print('\n##### ERROR #####\n')
