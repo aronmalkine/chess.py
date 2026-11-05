@@ -241,10 +241,39 @@ class Chess(object):
 
     sys.exit()
 
-# Create game
-game = Chess('Aron', 'Mous')
+def prompt_name(color):
+  while True:
+    name = input("Enter name for {}: ".format(color)).strip()
+    if name:
+      return name
+    print("Name cannot be empty.")
 
-game.play()
+
+def confirm_start(white_name, black_name):
+  print("\n  white: {}\n  black: {}\n".format(white_name, black_name))
+  answer = input("Ready to start? [Y/n]: ").strip().lower()
+  return answer in ('', 'y', 'yes')
+
+
+def main():
+  print("Welcome to Chess!\n")
+  try:
+    while True:
+      white_name = prompt_name('white')
+      black_name = prompt_name('black')
+      if confirm_start(white_name, black_name):
+        break
+      print("\nLet's try again.\n")
+  except (EOFError, KeyboardInterrupt):
+    print("\n\nGoodbye!\n")
+    return
+
+  game = Chess(white_name, black_name)
+  game.play()
+
+
+if __name__ == "__main__":
+  main()
 
 
 
