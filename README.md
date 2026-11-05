@@ -1,6 +1,6 @@
 # Chess
 
-A two-player, command-line game of chess written in Python. Players take turns typing commands at a prompt; the board is rendered as text in the terminal.
+A two-player, command-line game of chess written in Python. Players take turns typing commands at a prompt; the board is rendered in the terminal with Unicode pieces on colored squares.
 
 ## Requirements
 
@@ -17,13 +17,17 @@ python3 chess.py
 ./chess.py
 ```
 
-The game starts immediately with white to move. Player names are set at the bottom of `chess.py`:
-
-```python
-game = Chess('Aron', 'Mous')
-```
+On startup you are prompted for the white and black player names (empty names are rejected), then asked `Ready to start? [Y/n]`. Answering anything other than Enter, `y` or `yes` lets you re-enter the names. Ctrl-C or Ctrl-D at any of these prompts exits cleanly. White moves first.
 
 ## Reading the board
+
+In a terminal, the board is drawn with filled Unicode chess glyphs on light and dark squares (a1 is dark):
+
+- White pieces are bold white; black pieces are bold black.
+- Ranks are numbered down the left and files lettered along the bottom. Use `flip` to view the board from black's side.
+- Squares are written file then rank, e.g. `e4`.
+
+If output is not a terminal (e.g. piped) or the `NO_COLOR` environment variable is set, a plain-text board is used instead:
 
 ```
 8 |  +r +k +b +Q +K +b +k +r |
@@ -33,7 +37,6 @@ game = Chess('Aron', 'Mous')
 ```
 
 - White pieces are shown plain (` p `); black pieces are prefixed with `+` (`+p `).
-- Squares are written file then rank, e.g. `e4`.
 
 | Code | Piece  |
 |------|--------|
@@ -43,6 +46,8 @@ game = Chess('Aron', 'Mous')
 | `b`  | Bishop |
 | `k`  | Knight |
 | `p`  | Pawn   |
+
+The same letter codes appear in the move history and score output.
 
 ## Commands
 
@@ -73,11 +78,12 @@ Type a command at the `<color> to move:` prompt.
 - Move history in a compact notation (piece letter, destination, `x` for captures)
 - Material score using standard-ish values (pawn 100, knight/bishop 350, rook 500, queen 1000)
 - Move and attack inspection for individual pieces
+- Colored Unicode board, with a `flip` command to view it from either side
+- Startup prompts for player names with a ready confirmation
 
 ## Known limitations
 
 - Not implemented: castling, en passant, pawn promotion
 - Checkmate and stalemate are not detected, so the game only ends when you `quit`
 - `moves white` / `moves black` prints `ToDo`
-- Player names are hard-coded rather than prompted for
 - `debug` fails if `ipdb` is not installed
