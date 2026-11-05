@@ -32,9 +32,9 @@ In a terminal, the board is drawn with filled Unicode chess glyphs on light and 
 If output is not a terminal (e.g. piped) or the `NO_COLOR` environment variable is set, a plain-text board is used instead (it has no move or check highlighting, and its side panel lists captured pieces by letter code, with black pieces prefixed `+`; the `### CHECK! ###` message still appears):
 
 ```
-8 |  +r +k +b +Q +K +b +k +r |
+8 |  +R +N +B +Q +K +B +N +R |
 ...
-1 |   r  k  b  Q  K  b  k  r |
+1 |   R  N  B  Q  K  B  N  R |
       a  b  c  d  e  f  g  h
 ```
 
@@ -44,9 +44,9 @@ If output is not a terminal (e.g. piped) or the `NO_COLOR` environment variable 
 |------|--------|
 | `K`  | King   |
 | `Q`  | Queen  |
-| `r`  | Rook   |
-| `b`  | Bishop |
-| `k`  | Knight |
+| `R`  | Rook   |
+| `B`  | Bishop |
+| `N`  | Knight |
 | `p`  | Pawn   |
 
 The same letter codes appear in the move history and score output.
@@ -59,7 +59,7 @@ Besides `move <from> <to>`, you can type a move directly at the prompt:
 |------|---------|---------|
 | Pawn move | `e4` | The pawn on that file moves to `e4` |
 | Pawn capture | `exd5` | The pawn on the e-file captures on `d5` |
-| Piece move | `Nf3`, `Bxc6`, `Qd1` | Piece letter `K Q R B N` (note: `N` is the knight), `x` for a capture is optional |
+| Piece move | `Nf3`, `Bxc6`, `Qd1` | Piece letter `K Q R B N`, `x` for a capture is optional |
 | Disambiguation | `Nbd2`, `R1e2`, `Qh4e1` | Add the from-file, rank, or both when two pieces could move there |
 | Coordinates | `e2e4`, `e2-e4`, `e2 e4` | From-square then to-square |
 

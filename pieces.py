@@ -92,7 +92,7 @@ class King(Piece):
 
 class Knight(Piece):
   name = "knight"
-  code = "k"
+  code = "N"
   value = 350
   def moves(self):
     moves = []
@@ -142,7 +142,7 @@ class Pawn(Piece):
 
 class Rook(Piece):
   name = "rook"
-  code = "r"
+  code = "R"
   value = 500
   def moves(self):
     moves = []
@@ -158,7 +158,7 @@ class Rook(Piece):
 
 class Bishop(Piece):
   name = "bishop"
-  code = "b"
+  code = "B"
   value = 350
   def moves(self):
     moves = []
