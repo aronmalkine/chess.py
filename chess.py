@@ -27,6 +27,7 @@ class Chess(object):
       history/h -- show history of game up until present
       score/s -- show scores
       board/b -- render the board
+      flip/f -- flip the board to view it from the other side
       moves -- list moves for black, white, or for an occupied square, ex: 'moves white' or 'moves c1'
       attacks -- list attacks for black, white, or for an occupied square, ex: 'attacks white' or 'attacks c1')
       move/m -- move from sqare to square, ex 'm d2 d4'
@@ -143,6 +144,10 @@ class Chess(object):
           print("black: {material:>6}".format(material=black_material), ", ".join(black_pieces))
 
         elif command in [ 'board', 'b']:
+          self.b.render()
+
+        elif command in [ 'flip', 'f' ]:
+          self.b.flipped = not self.b.flipped
           self.b.render()
 
         elif command == 'moves':

@@ -53,6 +53,7 @@ Type a command at the `<color> to move:` prompt.
 | `move <from> <to>` | `m` | Move a piece, e.g. `m d2 d4` |
 | `undo` | `u` | Undo the last move (including captures) and switch back to the previous player |
 | `board` | `b` | Re-render the board |
+| `flip` | `f` | Flip the board to view it from the other side (stays flipped until toggled again) |
 | `history` | `h` | Show the moves so far, numbered in rounds (white and black side by side) |
 | `score` | `s` | Show material captured by each side and the pieces taken |
 | `moves <square>` | | List the squares the piece on `<square>` can move to, e.g. `moves g1` |

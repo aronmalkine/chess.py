@@ -1,6 +1,7 @@
 # board.py
 
-import curses
+import os
+import sys
 import pieces
 import history
 
@@ -59,6 +60,7 @@ class Board(object):
   SIZE = 8
   squares = [] 
   h = None
+  flipped = False  # when True, render from black's side of the board
 
   def __init__(self):
     self.squares = [[ None ] * self.SIZE for i in range(self.SIZE)]
@@ -116,26 +118,67 @@ class Board(object):
   def score(self):
     return self.h.score()
 
+  # Filled glyphs are used for both colors; the foreground color tells them apart.
+  # U+FE0E forces text (not emoji) presentation for the pawn.
+  GLYPHS = {
+    'king': '\u265a', 'queen': '\u265b', 'rook': '\u265c',
+    'bishop': '\u265d', 'knight': '\u265e', 'pawn': '\u265f\ufe0e',
+  }
+  LIGHT_BG = '\033[48;5;180m'
+  DARK_BG = '\033[48;5;94m'
+  WHITE_FG = '\033[1;38;5;231m'
+  BLACK_FG = '\033[1;38;5;16m'
+  RESET = '\033[0m'
+
+  def _use_color(self):
+    return sys.stdout.isatty() and 'NO_COLOR' not in os.environ
+
   def render(self):
+    if self._use_color():
+      self._render_color()
+    else:
+      self._render_plain()
+
+  def _ranks(self):
+    return range(self.SIZE) if self.flipped else range(self.SIZE-1, -1, -1)
+
+  def _files(self):
+    return range(self.SIZE-1, -1, -1) if self.flipped else range(self.SIZE)
+
+  def _render_color(self):
+    print()
+    for y in self._ranks():
+      row = "{} ".format(y+1)
+      for x in self._files():
+        square = self.squares[x][y]
+        bg = self.DARK_BG if (x + y) % 2 == 0 else self.LIGHT_BG
+        if square.is_empty():
+          row += "{}   {}".format(bg, self.RESET)
+        else:
+          fg = self.WHITE_FG if square.piece.color == "white" else self.BLACK_FG
+          row += "{}{} {} {}".format(bg, fg, self.GLYPHS[square.piece.name], self.RESET)
+      print(row)
+    print("   " + "".join(" {} ".format(self.x_values[x]) for x in self._files()))
+
+  def _render_plain(self):
     print()
     print('   ',''.join((["---"] * self.SIZE)))
-    for y in range(self.SIZE-1,-1,-1):
-      # print("y", y)
+    for y in self._ranks():
       row = "{} | ".format(y+1  )
-      for x in range(self.SIZE):
+      for x in self._files():
         # print("x", x)
         item = self.squares[x][y]
         if item.is_empty():
           row = row + "   "
         else:
-          if item.piece.color is "white":
+          if item.piece.color == "white":
             row = row + " {} ".format(item.piece.code)
           else:
             row = row + "+{} ".format(item.piece.code)
       print(row, "|")
     print('   ',''.join((["---"] * self.SIZE)))
     y_labels = '    '
-    for a in range(8):
-      y_labels += " {} ".format(chr(97+a))
+    for x in self._files():
+      y_labels += " {} ".format(self.x_values[x])
     print(y_labels)
 
