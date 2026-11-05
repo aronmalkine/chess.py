@@ -49,6 +49,20 @@ If output is not a terminal (e.g. piped) or the `NO_COLOR` environment variable 
 
 The same letter codes appear in the move history and score output.
 
+## Entering moves
+
+Besides `move <from> <to>`, you can type a move directly at the prompt:
+
+| Form | Example | Meaning |
+|------|---------|---------|
+| Pawn move | `e4` | The pawn on that file moves to `e4` |
+| Pawn capture | `exd5` | The pawn on the e-file captures on `d5` |
+| Piece move | `Nf3`, `Bxc6`, `Qd1` | Piece letter `K Q R B N` (note: `N` is the knight), `x` for a capture is optional |
+| Disambiguation | `Nbd2`, `R1e2`, `Qh4e1` | Add the from-file, rank, or both when two pieces could move there |
+| Coordinates | `e2e4`, `e2-e4`, `e2 e4` | From-square then to-square |
+
+A trailing `+` or `#` is accepted and ignored. Piece letters must be uppercase. If two pieces could make the move, you are told which squares and asked to disambiguate.
+
 ## Commands
 
 Type a command at the `<color> to move:` prompt.
@@ -56,6 +70,7 @@ Type a command at the `<color> to move:` prompt.
 | Command | Alias | Description |
 |---------|-------|-------------|
 | `move <from> <to>` | `m` | Move a piece, e.g. `m d2 d4` |
+| `<notation>` | | Move using standard notation, with no command word (see [Entering moves](#entering-moves)) |
 | `undo` | `u` | Undo the last move (including captures) and switch back to the previous player |
 | `board` | `b` | Re-render the board |
 | `flip` | `f` | Flip the board to view it from the other side (stays flipped until toggled again) |
@@ -78,12 +93,14 @@ Type a command at the `<color> to move:` prompt.
 - Move history in a compact notation (piece letter, destination, `x` for captures)
 - Material score using standard-ish values (pawn 100, knight/bishop 350, rook 500, queen 1000)
 - Move and attack inspection for individual pieces
+- Moves can be entered in standard algebraic or coordinate notation
 - Colored Unicode board, with a `flip` command to view it from either side
 - Startup prompts for player names with a ready confirmation
 
 ## Known limitations
 
-- Not implemented: castling, en passant, pawn promotion
+- Not implemented: castling, en passant, pawn promotion (`O-O` and `e8=Q` are recognized but rejected)
+- When two pieces could make a move, a pinned piece still counts as a candidate, so you may be asked to disambiguate when only one move is actually legal
 - Checkmate and stalemate are not detected, so the game only ends when you `quit`
 - `moves white` / `moves black` prints `ToDo`
 - `debug` fails if `ipdb` is not installed

@@ -23,7 +23,7 @@ class Player(object):
     to_square = self.board.at(to_square_code)
 
     if from_square.piece is None:
-      raise ValueError("No piece found on", from_square_code)
+      raise ValueError("No piece found on {}".format(from_square_code))
     if from_square.piece.color != self.color:
       raise ValueError("Illegal move: Cannot move opponent's piece.")
 

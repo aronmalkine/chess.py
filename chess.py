@@ -8,6 +8,7 @@ import board
 import history
 import players
 import pieces
+import notation
 
 
 class Chess(object):
@@ -31,6 +32,7 @@ class Chess(object):
       moves -- list moves for black, white, or for an occupied square, ex: 'moves white' or 'moves c1'
       attacks -- list attacks for black, white, or for an occupied square, ex: 'attacks white' or 'attacks c1')
       move/m -- move from sqare to square, ex 'm d2 d4'
+      <notation> -- standard notation without a command, ex 'e4', 'Nf3', 'exd5', 'e2e4', 'e2 e4'
       debug/d -- enter debug mode (ipdb session)      
 
   opponent -- takes a player object and returns the other player object
@@ -106,6 +108,35 @@ class Chess(object):
       if king_square == attack[1].code():
         return True
     return False
+
+  def make_move(self, move_from, move_to):
+    """Make a move for the current player, roll it back if it leaves them in check."""
+
+    from_check = self.in_check(self.current_player)
+
+    self.current_player.move(move_from, move_to)
+
+    if self.in_check(self.current_player) and from_check:
+
+      last_move = self.b.h.pop()
+      self.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
+
+      print("Illegal move: King remains in check!")
+
+    elif self.in_check(self.current_player):
+
+      last_move = self.b.h.pop()
+      self.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
+
+      print("Illegal move: Cannot put yourself in check!")
+
+    else:
+
+      self.switch_players()
+      self.b.render()
+
+      if self.in_check(self.current_player):
+        print("\n### CHECK! ###")
 
   def play(self):
 
@@ -188,34 +219,7 @@ class Chess(object):
 
         elif command in [ "move", "m" ]:
 
-          move_from = input_data[1]
-          move_to = input_data[2]
-
-          from_check = self.in_check(self.current_player)
-
-          self.current_player.move(move_from, move_to)
-
-          if self.in_check(self.current_player) and from_check:
-
-            last_move = self.b.h.pop()
-            self.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
-
-            print("Illegal move: King remains in check!")
-
-          elif self.in_check(self.current_player):
-
-            last_move = self.b.h.pop()
-            self.current_player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
-
-            print("Illegal move: Cannot put yourself in check!")
-
-          else:
-
-            self.switch_players()
-            self.b.render()
-
-            if self.in_check(self.current_player):
-              print("\n### CHECK! ###")
+          self.make_move(input_data[1], input_data[2])
 
         elif command in [ "debug", "d" ]:
 
@@ -224,7 +228,9 @@ class Chess(object):
           print("\nResuming game\n\n")
 
         else:
-          print("Unrecognized command:", input_data)
+          # Not a named command: try standard notation, ex 'e4', 'Nf3', 'exd5', 'e2e4', 'e2 e4'
+          move_from, move_to = notation.parse_move(" ".join(input_data), self.b, self.current_player)
+          self.make_move(move_from, move_to)
 
 
       except ValueError as error:
