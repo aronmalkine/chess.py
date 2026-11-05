@@ -118,7 +118,27 @@ class Chess(object):
     check_square = None
     if self.in_check(self.current_player):
       check_square = self.b.find_first(self.current_player.color, 'king').square.code()
-    self.b.render(last_move_squares, check_square)
+    self.b.render(last_move_squares, check_square, self.panel_lines())
+
+  def panel_lines(self):
+    """Text shown beside the board: each player, whose turn it is, and what they have captured."""
+    taken = {'white': [], 'black': []}  # pieces captured BY each color
+    for event in self.b.h.hist:
+      if event.piece_taken:
+        taken[event.player.color].append(event.piece_taken)
+
+    def side(player):
+      captured = sorted(taken[player.color], key=lambda p: -p.value)
+      marker = ">" if player is self.current_player else " "
+      return [
+        "{} {}: {}".format(marker, player.color, player.name),
+        "    took: " + " ".join(self.b.symbol(p) for p in captured),
+        "    points: {}".format(sum(p.value for p in captured)),
+      ]
+
+    # Show the side at the top of the board first
+    top, bottom = (self.white, self.black) if self.b.flipped else (self.black, self.white)
+    return side(top) + ["", ""] + side(bottom)
 
   def make_move(self, move_from, move_to):
     """Make a move for the current player, roll it back if it leaves them in check."""

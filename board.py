@@ -124,6 +124,11 @@ class Board(object):
     'king': '\u265a', 'queen': '\u265b', 'rook': '\u265c',
     'bishop': '\u265d', 'knight': '\u265e', 'pawn': '\u265f\ufe0e',
   }
+  # Outline glyphs for white pieces in the side panel, which has no square background.
+  OUTLINE_GLYPHS = {
+    'king': '\u2654', 'queen': '\u2655', 'rook': '\u2656',
+    'bishop': '\u2657', 'knight': '\u2658', 'pawn': '\u2659',
+  }
   LIGHT_BG = '\033[48;5;180m'
   DARK_BG = '\033[48;5;94m'
   LIGHT_MOVE_BG = '\033[48;5;186m'   # last move highlight
@@ -136,18 +141,28 @@ class Board(object):
   def _use_color(self):
     return sys.stdout.isatty() and 'NO_COLOR' not in os.environ
 
-  def render(self, last_move_squares=(), check_square=None):
+  def symbol(self, piece):
+    """Short text for a piece outside the board (e.g. captured pieces)."""
+    if not self._use_color():
+      return piece.code if piece.color == "white" else "+" + piece.code
+    glyphs = self.OUTLINE_GLYPHS if piece.color == "white" else self.GLYPHS
+    return glyphs[piece.name]
+
+  def render(self, last_move_squares=(), check_square=None, panel=None):
     """Print the board.
 
     last_move_squares -- square codes (from, to) to highlight as the last move
     check_square -- square code of a king in check, highlighted in red
+    panel -- up to SIZE lines of text shown to the right of the board rows
 
     Highlights are only drawn on the colored board.
     """
+    panel = list(panel or [])
+    panel += [""] * (self.SIZE - len(panel))
     if self._use_color():
-      self._render_color(last_move_squares, check_square)
+      self._render_color(last_move_squares, check_square, panel)
     else:
-      self._render_plain()
+      self._render_plain(panel)
 
   def _ranks(self):
     return range(self.SIZE) if self.flipped else range(self.SIZE-1, -1, -1)
@@ -155,9 +170,10 @@ class Board(object):
   def _files(self):
     return range(self.SIZE-1, -1, -1) if self.flipped else range(self.SIZE)
 
-  def _render_color(self, last_move_squares=(), check_square=None):
+  def _render_color(self, last_move_squares=(), check_square=None, panel=None):
+    panel = panel or [""] * self.SIZE
     print()
-    for y in self._ranks():
+    for line_no, y in enumerate(self._ranks()):
       row = "{} ".format(y+1)
       for x in self._files():
         square = self.squares[x][y]
@@ -173,13 +189,14 @@ class Board(object):
         else:
           fg = self.WHITE_FG if square.piece.color == "white" else self.BLACK_FG
           row += "{}{} {} {}".format(bg, fg, self.GLYPHS[square.piece.name], self.RESET)
-      print(row)
+      print(row + "   " + panel[line_no])
     print("   " + "".join(" {} ".format(self.x_values[x]) for x in self._files()))
 
-  def _render_plain(self):
+  def _render_plain(self, panel=None):
+    panel = panel or [""] * self.SIZE
     print()
     print('   ',''.join((["---"] * self.SIZE)))
-    for y in self._ranks():
+    for line_no, y in enumerate(self._ranks()):
       row = "{} | ".format(y+1  )
       for x in self._files():
         # print("x", x)
@@ -191,7 +208,7 @@ class Board(object):
             row = row + " {} ".format(item.piece.code)
           else:
             row = row + "+{} ".format(item.piece.code)
-      print(row, "|")
+      print(row, "|", "  " + panel[line_no] if panel[line_no] else "")
     print('   ',''.join((["---"] * self.SIZE)))
     y_labels = '    '
     for x in self._files():
