@@ -29,7 +29,7 @@ class Chess(object):
       score/s -- show scores
       board/b -- render the board
       flip/f -- flip the board to view it from the other side
-      moves -- list moves for black, white, or for an occupied square, ex: 'moves white' or 'moves c1'
+      moves -- show the moves for an occupied square on the board and list them, ex: 'moves c1' ('moves white'/'moves black' is not implemented yet)
       attacks -- list attacks for black, white, or for an occupied square, ex: 'attacks white' or 'attacks c1')
       move/m -- move from sqare to square, ex 'm d2 d4'
       <notation> -- standard notation without a command, ex 'e4', 'Nf3', 'exd5', 'e2e4', 'e2 e4'
@@ -109,8 +109,12 @@ class Chess(object):
         return True
     return False
 
-  def render(self):
-    """Render the board, highlighting the last move and a king in check."""
+  def render(self, move_squares=(), capture_squares=(), selected=None):
+    """Render the board, highlighting the last move and a king in check.
+
+    move_squares, capture_squares and selected are optional square codes used to
+    show where a piece can go (see the 'moves' command).
+    """
     last_move_squares = ()
     if self.b.h.hist:
       last = self.b.h.hist[-1]
@@ -118,7 +122,7 @@ class Chess(object):
     check_square = None
     if self.in_check(self.current_player):
       check_square = self.b.find_first(self.current_player.color, 'king').square.code()
-    self.b.render(last_move_squares, check_square, self.panel_lines())
+    self.b.render(last_move_squares, check_square, self.panel_lines(), move_squares, capture_squares, selected)
 
   def panel_lines(self):
     """Text shown beside the board: each player, whose turn it is, and what they have captured."""
@@ -218,11 +222,19 @@ class Chess(object):
 
           if len(target) == 2:
 
-            moves = self.b.at(target).piece.moves()
+            square = self.b.at(target)
 
-            readable_moves = self.b.to_code(moves)
+            if square.is_empty():
+              raise ValueError("No piece found on {}".format(target))
 
-            print(", ".join(readable_moves))
+            moves = self.b.to_code(square.piece.moves())
+
+            capture_squares = [code for code in moves if self.b.at(code).is_occupied()]
+            move_squares = [code for code in moves if code not in capture_squares]
+
+            self.render(move_squares, capture_squares, selected=target)
+
+            print(", ".join(moves) if moves else "No moves available.")
 
           elif target in [ "white", "black" ]:
 

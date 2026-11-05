@@ -30,7 +30,10 @@ class Piece(object):
       x1, y1 = m
       if b.exists(x1, y1):
         target_square = b[x1][y1]
-        if not attacks_only:
+        if moves_only:
+          if target_square.is_empty():
+            valid.append(m)
+        elif not attacks_only:
           if target_square.is_empty() or target_square.piece.color != self.color:
             valid.append(m)
         else:
@@ -111,14 +114,16 @@ class Pawn(Piece):
       # normal move
       possible_moves = [ [x, y+1] ]
       # two forward on first move
-      if y == 1:
+      b = self.square._board
+      if y == 1 and b[x][y+1].is_empty():
         possible_moves.append( [x, y+2] )
       moves = self.valid(possible_moves=possible_moves, moves_only=True)
     else:
       # normal move
       possible_moves = [ [x, y-1] ]
       # two forward on first move
-      if y == 6:
+      b = self.square._board
+      if y == 6 and b[x][y-1].is_empty():
         possible_moves.append( [x, y-2] )
       moves = self.valid(possible_moves=possible_moves, moves_only=True)     
     return moves + self.attacks()

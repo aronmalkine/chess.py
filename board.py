@@ -134,6 +134,10 @@ class Board(object):
   LIGHT_MOVE_BG = '\033[48;5;186m'   # last move highlight
   DARK_MOVE_BG = '\033[48;5;136m'
   CHECK_BG = '\033[48;5;160m'        # king in check
+  SELECTED_BG = '\033[48;5;38m'      # piece whose moves are shown
+  LIGHT_TARGET_BG = '\033[48;5;151m' # empty square the piece can move to
+  DARK_TARGET_BG = '\033[48;5;65m'
+  CAPTURE_BG = '\033[48;5;208m'      # occupied square the piece can capture
   WHITE_FG = '\033[1;38;5;231m'
   BLACK_FG = '\033[1;38;5;16m'
   RESET = '\033[0m'
@@ -148,21 +152,24 @@ class Board(object):
     glyphs = self.OUTLINE_GLYPHS if piece.color == "white" else self.GLYPHS
     return glyphs[piece.name]
 
-  def render(self, last_move_squares=(), check_square=None, panel=None):
+  def render(self, last_move_squares=(), check_square=None, panel=None, move_squares=(), capture_squares=(), selected=None):
     """Print the board.
 
     last_move_squares -- square codes (from, to) to highlight as the last move
     check_square -- square code of a king in check, highlighted in red
     panel -- up to SIZE lines of text shown to the right of the board rows
+    move_squares -- square codes of empty squares a piece can move to, marked with a dot
+    capture_squares -- square codes of occupied squares a piece can capture
+    selected -- square code of the piece whose moves are being shown
 
     Highlights are only drawn on the colored board.
     """
     panel = list(panel or [])
     panel += [""] * (self.SIZE - len(panel))
     if self._use_color():
-      self._render_color(last_move_squares, check_square, panel)
+      self._render_color(last_move_squares, check_square, panel, move_squares, capture_squares, selected)
     else:
-      self._render_plain(panel)
+      self._render_plain(panel, move_squares, capture_squares, selected)
 
   def _ranks(self):
     return range(self.SIZE) if self.flipped else range(self.SIZE-1, -1, -1)
@@ -170,7 +177,7 @@ class Board(object):
   def _files(self):
     return range(self.SIZE-1, -1, -1) if self.flipped else range(self.SIZE)
 
-  def _render_color(self, last_move_squares=(), check_square=None, panel=None):
+  def _render_color(self, last_move_squares=(), check_square=None, panel=None, move_squares=(), capture_squares=(), selected=None):
     panel = panel or [""] * self.SIZE
     print()
     for line_no, y in enumerate(self._ranks()):
@@ -180,11 +187,19 @@ class Board(object):
         dark = (x + y) % 2 == 0
         if square.code() == check_square:
           bg = self.CHECK_BG
+        elif square.code() == selected:
+          bg = self.SELECTED_BG
+        elif square.code() in capture_squares:
+          bg = self.CAPTURE_BG
+        elif square.code() in move_squares:
+          bg = self.DARK_TARGET_BG if dark else self.LIGHT_TARGET_BG
         elif square.code() in last_move_squares:
           bg = self.DARK_MOVE_BG if dark else self.LIGHT_MOVE_BG
         else:
           bg = self.DARK_BG if dark else self.LIGHT_BG
-        if square.is_empty():
+        if square.is_empty() and square.code() in move_squares:
+          row += "{}{} \u2022 {}".format(bg, self.BLACK_FG, self.RESET)
+        elif square.is_empty():
           row += "{}   {}".format(bg, self.RESET)
         else:
           fg = self.WHITE_FG if square.piece.color == "white" else self.BLACK_FG
@@ -192,7 +207,7 @@ class Board(object):
       print(row + "   " + panel[line_no])
     print("   " + "".join(" {} ".format(self.x_values[x]) for x in self._files()))
 
-  def _render_plain(self, panel=None):
+  def _render_plain(self, panel=None, move_squares=(), capture_squares=(), selected=None):
     panel = panel or [""] * self.SIZE
     print()
     print('   ',''.join((["---"] * self.SIZE)))
@@ -201,13 +216,20 @@ class Board(object):
       for x in self._files():
         # print("x", x)
         item = self.squares[x][y]
+        # '.' marks a square the selected piece can move to, '*' one it can capture,
+        # and '<' follows the selected piece itself
         if item.is_empty():
-          row = row + "   "
+          row = row + (" . " if item.code() in move_squares else "   ")
         else:
+          suffix = " "
+          if item.code() in capture_squares:
+            suffix = "*"
+          elif item.code() == selected:
+            suffix = "<"
           if item.piece.color == "white":
-            row = row + " {} ".format(item.piece.code)
+            row = row + " {}{}".format(item.piece.code, suffix)
           else:
-            row = row + "+{} ".format(item.piece.code)
+            row = row + "+{}{}".format(item.piece.code, suffix)
       print(row, "|", "  " + panel[line_no] if panel[line_no] else "")
     print('   ',''.join((["---"] * self.SIZE)))
     y_labels = '    '

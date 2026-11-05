@@ -78,11 +78,20 @@ Type a command at the `<color> to move:` prompt.
 | `flip` | `f` | Flip the board to view it from the other side (stays flipped until toggled again) |
 | `history` | `h` | Show the moves so far, numbered in rounds (white and black side by side) |
 | `score` | `s` | Show material captured by each side and the pieces taken |
-| `moves <square>` | | List the squares the piece on `<square>` can move to, e.g. `moves g1` |
+| `moves <square>` | | Show on the board where the piece on `<square>` can go, and list the squares, e.g. `moves g1` (see below) |
 | `attacks <square>` | | List the opposing pieces the piece on `<square>` can capture, e.g. `attacks c1` |
 | `attacks white` / `attacks black` | | List every capture available to that color (`X takes Y`) |
 | `debug` | `d` | Drop into an `ipdb` debugger session; resume the game when you exit it |
 | `quit` | `exit`, `q` | Exit the game |
+
+### Showing a piece's moves
+
+`moves <square>` redraws the board with that piece's destinations marked, then lists them. The marks only appear on that redraw; the next move, `board` or `flip` clears them.
+
+- **Colored board:** the piece is highlighted in blue, empty squares it can move to are green with a `•`, and pieces it can capture have an orange background.
+- **Plain board:** empty destinations show `.`, capturable pieces get a `*` after them, and the selected piece gets a `<` after it.
+
+Squares are pseudo-legal: they follow piece movement rules but don't filter out moves that would leave your own king in check (such moves are still rejected when you make them). `moves` works on any occupied square, either color.
 
 ## Features
 
@@ -94,7 +103,7 @@ Type a command at the `<color> to move:` prompt.
 - Unlimited undo
 - Move history in a compact notation (piece letter, destination, `x` for captures)
 - Material score using standard-ish values (pawn 100, knight/bishop 350, rook 500, queen 1000)
-- Move and attack inspection for individual pieces
+- Move and attack inspection for individual pieces, with `moves` marking destinations on the board
 - Moves can be entered in standard algebraic or coordinate notation
 - Colored Unicode board with last-move and check highlighting, a side panel showing turn and captures, and a `flip` command to view it from either side
 - Startup prompts for player names with a ready confirmation
