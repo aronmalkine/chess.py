@@ -126,6 +126,9 @@ class Board(object):
   }
   LIGHT_BG = '\033[48;5;180m'
   DARK_BG = '\033[48;5;94m'
+  LIGHT_MOVE_BG = '\033[48;5;186m'   # last move highlight
+  DARK_MOVE_BG = '\033[48;5;136m'
+  CHECK_BG = '\033[48;5;160m'        # king in check
   WHITE_FG = '\033[1;38;5;231m'
   BLACK_FG = '\033[1;38;5;16m'
   RESET = '\033[0m'
@@ -133,9 +136,16 @@ class Board(object):
   def _use_color(self):
     return sys.stdout.isatty() and 'NO_COLOR' not in os.environ
 
-  def render(self):
+  def render(self, last_move_squares=(), check_square=None):
+    """Print the board.
+
+    last_move_squares -- square codes (from, to) to highlight as the last move
+    check_square -- square code of a king in check, highlighted in red
+
+    Highlights are only drawn on the colored board.
+    """
     if self._use_color():
-      self._render_color()
+      self._render_color(last_move_squares, check_square)
     else:
       self._render_plain()
 
@@ -145,13 +155,19 @@ class Board(object):
   def _files(self):
     return range(self.SIZE-1, -1, -1) if self.flipped else range(self.SIZE)
 
-  def _render_color(self):
+  def _render_color(self, last_move_squares=(), check_square=None):
     print()
     for y in self._ranks():
       row = "{} ".format(y+1)
       for x in self._files():
         square = self.squares[x][y]
-        bg = self.DARK_BG if (x + y) % 2 == 0 else self.LIGHT_BG
+        dark = (x + y) % 2 == 0
+        if square.code() == check_square:
+          bg = self.CHECK_BG
+        elif square.code() in last_move_squares:
+          bg = self.DARK_MOVE_BG if dark else self.LIGHT_MOVE_BG
+        else:
+          bg = self.DARK_BG if dark else self.LIGHT_BG
         if square.is_empty():
           row += "{}   {}".format(bg, self.RESET)
         else:

@@ -24,10 +24,11 @@ On startup you are prompted for the white and black player names (empty names ar
 In a terminal, the board is drawn with filled Unicode chess glyphs on light and dark squares (a1 is dark):
 
 - White pieces are bold white; black pieces are bold black.
+- The last move is highlighted in yellow (both the from and to squares), and a king in check is highlighted in red. After `undo`, the highlight moves back to the previous move.
 - Ranks are numbered down the left and files lettered along the bottom. Use `flip` to view the board from black's side.
 - Squares are written file then rank, e.g. `e4`.
 
-If output is not a terminal (e.g. piped) or the `NO_COLOR` environment variable is set, a plain-text board is used instead:
+If output is not a terminal (e.g. piped) or the `NO_COLOR` environment variable is set, a plain-text board is used instead (it has no move or check highlighting; the `### CHECK! ###` message still appears):
 
 ```
 8 |  +r +k +b +Q +K +b +k +r |
@@ -94,7 +95,7 @@ Type a command at the `<color> to move:` prompt.
 - Material score using standard-ish values (pawn 100, knight/bishop 350, rook 500, queen 1000)
 - Move and attack inspection for individual pieces
 - Moves can be entered in standard algebraic or coordinate notation
-- Colored Unicode board, with a `flip` command to view it from either side
+- Colored Unicode board with last-move and check highlighting, and a `flip` command to view it from either side
 - Startup prompts for player names with a ready confirmation
 
 ## Known limitations

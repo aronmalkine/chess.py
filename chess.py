@@ -109,6 +109,17 @@ class Chess(object):
         return True
     return False
 
+  def render(self):
+    """Render the board, highlighting the last move and a king in check."""
+    last_move_squares = ()
+    if self.b.h.hist:
+      last = self.b.h.hist[-1]
+      last_move_squares = (last.from_square_code, last.to_square_code)
+    check_square = None
+    if self.in_check(self.current_player):
+      check_square = self.b.find_first(self.current_player.color, 'king').square.code()
+    self.b.render(last_move_squares, check_square)
+
   def make_move(self, move_from, move_to):
     """Make a move for the current player, roll it back if it leaves them in check."""
 
@@ -133,7 +144,7 @@ class Chess(object):
     else:
 
       self.switch_players()
-      self.b.render()
+      self.render()
 
       if self.in_check(self.current_player):
         print("\n### CHECK! ###")
@@ -141,7 +152,7 @@ class Chess(object):
   def play(self):
 
     # Show board
-    self.b.render()
+    self.render()
 
     while True: #(not self.in_check(self.current_player) or len(self.check_breaking_moves(self.current_player)) != 0):  
 
@@ -164,7 +175,7 @@ class Chess(object):
           last_move = self.b.h.pop()
           last_move.player.unmove(last_move.from_square_code, last_move.to_square_code, last_move.piece_taken)
           self.switch_players()
-          self.b.render()
+          self.render()
 
         elif command in [ 'history', 'h' ]:
           print(self.b.h)
@@ -175,11 +186,11 @@ class Chess(object):
           print("black: {material:>6}".format(material=black_material), ", ".join(black_pieces))
 
         elif command in [ 'board', 'b']:
-          self.b.render()
+          self.render()
 
         elif command in [ 'flip', 'f' ]:
           self.b.flipped = not self.b.flipped
-          self.b.render()
+          self.render()
 
         elif command == 'moves':
 
